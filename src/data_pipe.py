@@ -37,8 +37,10 @@ def merge_data(beer_path,brewery_path,ratings_path,filename):
     df = df.merge(brewery_df, how = 'left',left_on='brewery_id', right_on='id')
     # print(df.columns[0])
     #drop added columns
-    df.drop(['id_x'],axis=1,inplace=True)
-    df.to_csv(filename)
+    df.drop(['id_x','id_y'],axis=1,inplace=True)
+    df.rename({'name_x':'name','name_y':'brewery_name'},axis=1,inplace=True)
+    print('Saving to file...')
+    df.to_csv(filename, index=False)
 
 def get_top_ratings(path, filename, n=1000):
     '''
@@ -83,6 +85,7 @@ def get_top_ratings(path, filename, n=1000):
     spark.stop()
 
     df.dropna(inplace=True)
+    df = df[~(df.score>5)] #drop any ratings above 5
     df.to_csv(filename,index=False)
 
 
@@ -94,7 +97,7 @@ if __name__ == '__main__':
     brewery_path = 'data/breweries.csv'
     review_path = 'data/reviews.csv'
 
-    get_top_ratings('data/reviews.csv', 'data/top_ratings.csv')
+    # get_top_ratings('data/reviews.csv', 'data/top_ratings.csv')
     merge_data('data/beers.csv', 'data/breweries.csv', 'data/top_ratings.csv', 'data/top_beers.csv')    
 
 
