@@ -5,6 +5,7 @@ from tqdm import tqdm
 import json
 import pickle
 from collections import defaultdict
+import streamlit as st
 
 #content based imports
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -58,7 +59,6 @@ class ContentRecommender():
         
         self.save_obj(rec_d,'similarities')
         self.rec_d = rec_d
-        
     
     def get_recommendations(self,item,brewery,n=5):
         '''
@@ -90,14 +90,14 @@ class ContentRecommender():
             d = {'name':names,'brewery':breweries,'style':styles,'rating':scores,
                 'abv':abvs, 'description':notes,'state':states,'country':countries}
             new_df = pd.DataFrame(d)
-            print(new_df)
+            # print(new_df)
             return new_df
     
     def get_beer_id(self,item,brewery):
         '''
         Given beer name, returns beer id if a match is found
         '''
-        beer = self.df[((self.df['name'].str.contains(item))&(self.df['brewery_name'].str.contains(brewery)))]
+        beer = self.df[((self.df['name']==item)&(self.df['brewery_name']==brewery))]
 
         if len(beer)<1:
             print('Sorry, no beer was found with that name and brewery. \n Please try again.')
@@ -174,7 +174,42 @@ class CollabRecommender():
             user_ratings.sort(key=lambda x: x[1], reverse=True)
             top_n[uid] = user_ratings[:n]
 
-        return top_n   
+        return top_n
+    
+    def get_recommendations(self, df, top_ratings, sim_users, n=5):
+        '''
+        Given top ratings, returns df with top n recommended beers.
+        '''
+        beer_dict={}
+        for user in sim_users:
+            for item in top_ratings[user]:
+                if len(item)>0:
+                    beer_dict[item[0]]=item[1]
+        beer_ids = dict(sorted(beer_dict.items(),key=lambda item: item[1], reverse=True)[:n+1]).keys()
+        names=[]
+        breweries=[]
+        styles=[]
+        scores=[]
+        abvs=[]
+        notes=[]
+        states=[]
+        countries=[]
+        for id_ in beer_ids:
+            beer = df[df['beer_id']==id_]
+            names.append(beer.name.iloc[0])
+            breweries.append(beer.brewery_name.iloc[0])
+            styles.append(beer['style'].iloc[0])
+            scores.append(beer['score'].iloc[0])
+            abvs.append(beer['abv'].iloc[0])
+            notes.append(beer['notes'].iloc[0])
+            states.append(beer['state'].iloc[0])
+            countries.append(beer['country'].iloc[0])
+            # print(f'Reccomendation #{i+1}: {beer_name} from {brewery}')
+        d = {'name':names,'brewery':breweries,'style':styles,'rating':scores,
+            'abv':abvs, 'description':notes,'state':states,'country':countries}
+        new_df = pd.DataFrame(d)
+        # print(new_df)
+        return new_df 
 
     #pickle helper functions
     def save_obj(self,obj, name):
