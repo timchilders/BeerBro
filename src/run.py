@@ -77,9 +77,9 @@ if __name__ == '__main__':
     beer_df, ratings_df, user_df = load_dataframes()
     breweries = np.sort(beer_df.brewery_name.unique())
     st.title('Welcome to BeerBro!')
-    image = Image.open('img/beer-1796698.jpg')
-    st.image(image)
-    st.write('photo by Helena Lopes') 
+    # image = Image.open('img/beer-1796698.jpg')
+    # st.image(image)
+    # st.write('photo by Helena Lopes') 
 
     with st.sidebar.title('Find beers similar to your favorites.'):
         brewery = st.sidebar.selectbox(
@@ -103,7 +103,7 @@ if __name__ == '__main__':
     st.write('Based on the beer you select you may also like:')
     st.table(beer_recs)
 
-    st.sidebar.title('Find beers based on other users like you.')
+    st.sidebar.title('Find beers based on users like you.')
     st.sidebar.write('Give ratings for beers you like:')
     
     beers_=[]
