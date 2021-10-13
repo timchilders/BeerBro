@@ -7,12 +7,12 @@ I like beer. Who doesn't? There's been countless times I've found myself in the 
 
 The goal of this project is just that, build a beer recommender app so I will never again look like a lost and confused shopper in the beer isle.
 
-Introducing the fruits of my labor: **BeerBro**. The BeerBro app combines a content-based natural language processing  with the following results with a collaborative matrix factorization  with the following results to produce both precise and seridipitous beer recommendations based on a user's preferences.
+Introducing the fruits of my labor: **BeerBro**. The BeerBro app combines a content-based natural language processing with collaborative matrix factorization to produce both precise and seridipitous beer recommendations based on a user's preferences.
 
 # Data
-To train my  with the following results, I used review data from [ratebeer.com](https://www.ratebeer.com/). The dataset was obtained from [Kaggle](https://www.kaggle.com/ehallmar/beers-breweries-and-beer-reviews?select=beers.csv), and contains more than 9 million reviews on more than 250,000 unique beers.
+To train my model, I used review data from [ratebeer.com](https://www.ratebeer.com/). The dataset was obtained from [Kaggle](https://www.kaggle.com/ehallmar/beers-breweries-and-beer-reviews?select=beers.csv), and contains more than 9 million reviews on more than 250,000 unique beers.
 
-Each review contains scores for the look,smell,taste, feel, and overall score of each beer. Additionaly, many reviews include a text field which may contain tasting notes or an overall impression of the beer. Also included in the data are descriptions of each beer with features including: style, availability, abv, a text description of the label, the brewery that produced the beer, and its state and/or country.
+Each review contains scores for the look, smell, taste, feel, and overall score of each beer. Additionaly, many reviews include a text field which may contain tasting notes or an overall impression of the beer. Also included in the data are descriptions of each beer with features including: style, availability, abv, a text description of the label, the brewery that produced the beer, and its state and/or country.
 
 ## Beer Data
 Taking a look at the beer data, there are more than 112 unique styles of beer in the dataset. 
@@ -63,7 +63,7 @@ After filtering my data, I took a look at the distribution of reviews to discove
 <img src="img/beer_scores.png" width="700"/>
 
 
-By filtering the data, I also was able to collect abundant text reviews for each of the 1000 beers. This would prove to be helpful for my content-based  with the following results.
+By filtering the data, I also was able to collect abundant text reviews for each of the 1000 beers. This would prove to be helpful for my content-based reccomender.
 
 # Recommender System
 
@@ -71,7 +71,7 @@ By filtering the data, I also was able to collect abundant text reviews for each
 
 ## Content Recommender
 
-The content recommender relies on NLP to featurize the text content of the user reviews to find the most similar beers to a user's input. I created a matrix of TF-IDF features using Sklearn's text vectorizer, which I used to compute the cosine similarties between each beer. For each document, I selected to 10,000 highest weighted unigram and bigram words for each document. The resulting item-item similarity matrix is saved to produce future recommendations on the fly.
+The content recommender relies on NLP to featurize the text content of the user reviews to find the most similar beers to a user's input. I created a matrix of TF-IDF features using Sklearn's text vectorizer, which I used to compute the cosine similarties between each beer. For each document, I selected the 10,000 highest weighted unigram and bigram words for each document. The resulting item-item similarity matrix is saved to produce future recommendations on the fly.
 
 TF-IDF is a measure of how original a word in a document is by comparing the number of times that word occurs in the doccument with the number of documents having that word. It gives a weight to each word not only by its frequency but its frequency in comparison to all documents, which makes words unique to a document have higher weights than others.
 
@@ -85,7 +85,7 @@ Because I was dealing with a large (more than 100,000 users and 1000 beers) and 
 
 Matrix factorization works by decomposing the user-item matrix into two lower dimensional matrices. The first matrix has a row for each user, while the second has a column for each beer. The corresponding columns and rows of each matrix respectively, represent the latent factors. These factors, although having no real representation in the data, can represent hidden features of data that otherwise couldn't be found by inpsection. One significant advantage of this, is that the model can give more serendipitous recommendations (or recommendations the user would not expect but still enjoy). Additionaly, reconstructing the orginal matrix by finding the product of the two matrices fills in the missing ratings, producing predictions for each user on all items.
 
-To find the best matrix factorization based  with the following results, used cross validation to compute the root-mean-square error of the known ratings. I compared RMSE of the ScikitLearn Surprise package's NMF and SVD models, and Spark's ALS model with the following results:
+To find the best matrix factorization based model, I used cross validation to compute the root-mean-square error of the known ratings. I compared RMSE of the ScikitLearn Surprise package's NMF and SVD models, and Spark's ALS model with the following results:
 
 ```
 Normal Predictor: 0.889
@@ -104,7 +104,7 @@ learning rate: 0.005
 regularization: 0.02
 ```
 
-To test the model's performance, I calculated the precision and recall of the predictions. True Positives were beers that were recommended with true scores above a threshold of 4/5 stars. False Positives were beers that were recommended but with true scores falling bellow the threshold. False Negatives were the beers above the threshold but not recommeded. Selecting the top 5 beers for each user, and a threshold of 4, I got the following results:
+To test the model's performance, I calculated the precision and recall of the predictions. True Positives were beers that were recommended with true scores above a threshold of 4/5 stars. False Positives were beers that were recommended but with true scores falling bellow the threshold. False Negatives were the beers above the threshold but not recommended. Selecting the top 5 beers for each user, and a threshold of 4, I got the following results:
 
 ```
 Precision: 0.73
@@ -119,7 +119,7 @@ I solved this issue in two parts:
 
 First, for the user to receive collaborative-based predictions, the user is forced to rate at least four beers of their choosing. This allows the model to build a initial user profile that can be used to compare to other users.
 
-Second, because matrix factorization models require the user to already be within the initial user-item matrix to create predictions, I could not make unique predictions on-the-fly for each new user without retrainig the model each time. To get around this, my model computes a user-user pearson correlation-matrix after filtering users that have rated at least one of the same beers as the new user. The new user is then given the model's top predictions for the most similar users.
+Second, because matrix factorization models require the user to already be within the initial user-item matrix to create predictions, I could not make unique predictions on-the-fly for each new user without retraining the model each time. To get around this, my model computes a user-user pearson correlation-matrix after filtering users that have rated at least one of the same beers as the new user. The new user is then given the model's top predictions for the most similar users.
 
 # BeerBro App
 
